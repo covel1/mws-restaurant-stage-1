@@ -273,3 +273,9 @@ nav h1 a {
 #restaurant-hours td {
   color: #666;
 }
+/* ====================== Project customization ====================== */
+
+#restaurants-list {
+	display: flex;
+	flex-wrap: wrap; 
+}
