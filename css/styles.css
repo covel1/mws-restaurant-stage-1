@@ -147,6 +147,7 @@ nav h1 a {
   text-align: left;
   width: 270px;
 }
+/*
 #restaurants-list .restaurant-img {
   background-color: #ccc;
   display: block;
@@ -155,6 +156,7 @@ nav h1 a {
   min-height: 248px;
   min-width: 100%;
 }
+*/
 #restaurants-list li h1 {
   color: #f18200;
   font-family: Arial,sans-serif;
@@ -277,5 +279,28 @@ nav h1 a {
 
 #restaurants-list {
 	display: flex;
-	flex-wrap: wrap; 
+	flex-wrap: wrap;
 }
+.filter-options {
+	display: flex;
+	justify-content:center;
+}
+#restaurants-list .restaurant-img {
+  background-color: #ccc;
+  display: block;
+  margin: 0;
+  max-width: 100%;
+}
+@media screen and (max-width: 479px) {
+	.filter-options {
+		flex-direction: column;
+		min-height: 120px;
+		padding-top: 10px;
+	}
+	#neighborhoods-select,
+	#cuisines-select {
+		height :40px;
+	}
+}
+
+
