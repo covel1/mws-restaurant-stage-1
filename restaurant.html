@@ -11,9 +11,9 @@
 	<title>Restaurant Info</title>
 </head>
 
-<body class="inside">
+<body>
   <!-- Beginning header -->
-  <header>
+  <header class="row">
     <!-- Beginning nav -->
     <nav>
       <h1><a href="/">Restaurant Reviews</a></h1>
@@ -30,24 +30,28 @@
   <!-- Beginning main -->
   <main id="maincontent">
     <!-- Beginning map -->
-    <section id="map-container">
+	<div class="row">
+	<section id="restaurant-container" class="cell-md-4">
+	  <h1 id="restaurant-name"></h1>
+      <img id="restaurant-img">
+      <p id="restaurant-cuisine"></p>
+      <table id="restaurant-hours"></table>
+    </section>
+    <section id="map-container-restaurant" class="cell-md-4">
       <div id="map"></div>
+	  <p id="restaurant-address"></p>
     </section>
     <!-- End map -->
     <!-- Beginning restaurant -->
-    <section id="restaurant-container">
-      <h1 id="restaurant-name"></h1>
-      <img id="restaurant-img">
-      <p id="restaurant-cuisine"></p>
-      <p id="restaurant-address"></p>
-      <table id="restaurant-hours"></table>
-    </section>
     <!-- end restaurant -->
+	</div>
     <!-- Beginning reviews -->
-    <section id="reviews-container">
+	<div class="row">
+    <section id="reviews-container" class="cell-sm-12">
       <ul id="reviews-list"></ul>
     </section>
     <!-- End reviews -->
+	</div>
   </main>
   <!-- End main -->
 
