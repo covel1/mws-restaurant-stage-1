@@ -25,7 +25,7 @@ self.addEventListener('activate', function(event) {
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.filter(function(cacheName) {
-          return cacheName.startsWith('project-site1-') &&
+          return cacheName.startsWith('project-stage1-') &&
                  !allCaches.includes(cacheName);
         }).map(function(cacheName) {
           return caches.delete(cacheName);
@@ -41,12 +41,11 @@ self.addEventListener('fetch', function(event) {
     if (requestUrl.pathname === '/') {
       event.respondWith(caches.match('/index.html'));
       return;
-    }
+  }}
     if (requestUrl.pathname.startsWith('/img/')) {
       event.respondWith(servePhoto(event.request));
       return;
     }
-  }
   event.respondWith(
     caches.match(event.request).then(function(response) {
       return response || fetch(event.request);
