@@ -8,12 +8,12 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    /*get data from local json file = stage 1 */
+    /*get data from local json file = project stage 1 */
 	/*
 	const port = 8000 // Change to your server port
     return `http://localhost:${port}/data/restaurants.json`;
 	*/
-	/*get data from server through sails = stage 2*/
+	/*get data from server through sails = project stage 2*/
 	const port = 1337 // Change to your server port
     return `http://localhost:${port}/restaurants`;
 	
@@ -21,7 +21,7 @@ class DBHelper {
 
   /**
    * Fetch all restaurants.
-   */
+   *
   static fetchRestaurants(callback) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', DBHelper.DATABASE_URL);
@@ -38,7 +38,18 @@ class DBHelper {
     };
     xhr.send();
   }
-
+*/ 
+static fetchRestaurants(callback){
+	fetch(DBHelper.DATABASE_URL)
+	.then((response)=>{if (response.ok){return response.text()}
+	else {
+		throw new Error('Server response was not ok.');
+	}
+  })
+	.then((text)=>{let restaurants = JSON.parse(text);
+	callback(null, restaurants)})
+	.catch(error => console.log(error));  
+}
   /**
    * Fetch a restaurant by its ID.
    */
