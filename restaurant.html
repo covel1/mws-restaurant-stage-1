@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
@@ -10,7 +9,6 @@
 	<link rel="stylesheet" href="css/styles.css" type="text/css">
 	<title>Restaurant Info</title>
 </head>
-
 <body>
   <!-- Beginning header -->
   <header class="row">
@@ -26,7 +24,6 @@
     <!-- End nav -->
   </header>
   <!-- End header -->
-
   <!-- Beginning main -->
   <main id="maincontent">
     <!-- Beginning map -->
@@ -54,13 +51,11 @@
 	</div>
   </main>
   <!-- End main -->
-
   <!-- Beginning footer -->
   <footer id="footer" aria-hidden="true">
     Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
   </footer>
   <!-- End footer -->
-
   <!-- Beginning scripts -->
   <!-- Database helpers -->
   <script type="text/javascript" src="js/dbhelper.js"></script>
@@ -68,41 +63,6 @@
   <script type="text/javascript" src="js/restaurant_info.js"></script>
   <!-- Google Maps -->
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBge8XcDq0NsbNkPElOWu3wzvijsl2UI_s&libraries=places&callback=initMap"></script>
-  <script>
-	var CVAPP1 = (function (){
-		const loadSw = () => {
-			if ('serviceWorker' in navigator) {
-			  // Register a service worker hosted at the root of the
-			  // site using the default scope.
-			  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-				console.log('Service worker registration succeeded:', registration);
-			  }).catch(function(error) {
-				console.log('Service worker registration failed:', error);
-			  });
-
-			  // Do a one-off check if there's currently a
-			  // service worker in control.
-			  if (navigator.serviceWorker.controller) {
-				console.log('This page is currently controlled by:', navigator.serviceWorker.controller);
-			  }
-
-			  // Register a handler to detect when a new or
-			  // updated service worker takes control.
-			  navigator.serviceWorker.oncontrollerchange = function() {
-				console.log('This page is now controlled by:', navigator.serviceWorker.controller);
-			  };
-			} else {
-			  console.log('Service workers are not supported.');
-			}
-		}
-		return {
-			sw:loadSw
-		}
-	})(CVAPP1 || {});//module pattern
-	addEventListener('load',() => {CVAPP1.sw()});
-  </script>
   <!-- End scripts -->
-
 </body>
-
 </html>
