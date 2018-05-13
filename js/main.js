@@ -1,37 +1,8 @@
-/**
-* Register service worker
-*/
-
-if ('serviceWorker' in navigator) {
-	  // Register a service worker hosted at the root of the
-	  // site using the default scope.
-	  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-		console.log('Service worker registration succeeded:', registration);
-	  }).catch(function(error) {
-		console.log('Service worker registration failed:', error);
-	  });
-
-	  // Do a one-off check if there's currently a
-	  // service worker in control.
-	  if (navigator.serviceWorker.controller) {
-		console.log('This page is currently controlled by:', navigator.serviceWorker.controller);
-	  }
-
-	  // Register a handler to detect when a new or
-	  // updated service worker takes control.
-	  navigator.serviceWorker.oncontrollerchange = function() {
-		console.log('This page is now controlled by:', navigator.serviceWorker.controller);
-	  };
-	} else {
-	  console.log('Service workers are not supported.');
-}
-/* Registration end */
-
 let restaurants,
   neighborhoods,
   cuisines;
-var map;
-var markers = [];
+let map;
+let markers = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -208,5 +179,5 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 }
 /**
-* Add customization for project stage 1
+* Add customization for project stage 2
 */

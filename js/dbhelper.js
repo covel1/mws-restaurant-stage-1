@@ -3,57 +3,45 @@
  */
 class DBHelper {
 
-  /**
-   * Database URL.
-   * Change this to restaurants.json file location on your server.
-   */
-  static get DATABASE_URL() {
-    /*get data from local json file = project stage 1 */
-	/*
-	const port = 8000 // Change to your server port
-    return `http://localhost:${port}/data/restaurants.json`;
-	*/
-	/*get data from server through sails = project stage 2*/
+/**
+* Database URL.
+*/
+static get DATABASE_URL() {
 	const port = 1337 // Change to your server port
-    return `http://localhost:${port}/restaurants`;
-	
-  }
+	return `http://localhost:${port}/restaurants`;
+}
 
-  /**
-   * Fetch all restaurants.
-   *
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        //const json = JSON.parse(xhr.responseText);stage 1
-        //const restaurants = json.restaurants;stage 1
-		const restaurants = JSON.parse(xhr.responseText);
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
-  }
-*/ 
+/**
+* Fetch all restaurants from the server
+* On error, read from database
+*/
 static fetchRestaurants(callback){
 	fetch(DBHelper.DATABASE_URL)
-	.then((response)=>{if (response.ok){return response.text()}
-	else {
-		throw new Error('Server response was not ok.');
-	}
-  })
-	.then((text)=>{let restaurants = JSON.parse(text);
-	callback(null, restaurants)})
-	.catch(error => console.log(error));  
+		.then(response => {if (response.ok === true){return response.text()}
+		   else{throw new Error('Server response was not ok.')}
+		})
+		.then(text => {let restaurants = JSON.parse(text);
+			callback(null, restaurants);
+		})
+		.catch(error => {
+		console.log(error + ' Try to load from DB');
+			idb.open('projphase2', 1)
+			.then(db => {
+				console.log('Open DB was hit');
+				let tx = db.transaction(['restaurantList'], 'readonly');
+				let store = tx.objectStore('restaurantList');
+				return store.getAll();
+			})
+			.then(restaurants => {
+				callback(null, restaurants);
+			})
+		})	
 }
-  /**
-   * Fetch a restaurant by its ID.
-   */
-  static fetchRestaurantById(id, callback) {
+
+/**
+* Fetch a restaurant by its ID.
+*/
+static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -67,12 +55,12 @@ static fetchRestaurants(callback){
         }
       }
     });
-  }
+}
 
-  /**
-   * Fetch restaurants by a cuisine type with proper error handling.
-   */
-  static fetchRestaurantByCuisine(cuisine, callback) {
+/**
+* Fetch restaurants by a cuisine type with proper error handling.
+*/ 
+static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -83,12 +71,12 @@ static fetchRestaurants(callback){
         callback(null, results);
       }
     });
-  }
+}
 
-  /**
-   * Fetch restaurants by a neighborhood with proper error handling.
-   */
-  static fetchRestaurantByNeighborhood(neighborhood, callback) {
+/**
+* Fetch restaurants by a neighborhood with proper error handling.
+*/
+static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -99,12 +87,12 @@ static fetchRestaurants(callback){
         callback(null, results);
       }
     });
-  }
+}
 
-  /**
-   * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
-   */
-  static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
+/**
+* Fetch restaurants by a cuisine and a neighborhood with proper error handling.
+*/
+static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -120,12 +108,12 @@ static fetchRestaurants(callback){
         callback(null, results);
       }
     });
-  }
+}
 
-  /**
-   * Fetch all neighborhoods with proper error handling.
-   */
-  static fetchNeighborhoods(callback) {
+/**
+* Fetch all neighborhoods with proper error handling.
+*/
+static fetchNeighborhoods(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -138,12 +126,12 @@ static fetchRestaurants(callback){
         callback(null, uniqueNeighborhoods);
       }
     });
-  }
+}
 
-  /**
-   * Fetch all cuisines with proper error handling.
-   */
-  static fetchCuisines(callback) {
+/**
+* Fetch all cuisines with proper error handling.
+*/
+static fetchCuisines(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -156,26 +144,26 @@ static fetchRestaurants(callback){
         callback(null, uniqueCuisines);
       }
     });
-  }
+}
 
-  /**
-   * Restaurant page URL.
-   */
-  static urlForRestaurant(restaurant) {
+/**
+* Restaurant page URL.
+*/
+static urlForRestaurant(restaurant) {
     return (`./restaurant.html?id=${restaurant.id}`);
-  }
+}
 
-  /**
-   * Restaurant image URL.
-   */
-  static imageUrlForRestaurant(restaurant) {
+/**
+* Restaurant image URL.
+*/
+static imageUrlForRestaurant(restaurant) {
     return (`/img/${restaurant.photograph}.jpg`);
-  }
+}
 
-  /**
-   * Map marker for a restaurant.
-   */
-  static mapMarkerForRestaurant(restaurant, map) {
+/**
+* Map marker for a restaurant.
+*/
+static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
       title: restaurant.name,
@@ -185,5 +173,4 @@ static fetchRestaurants(callback){
     );
     return marker;
   }
-
 }
