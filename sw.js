@@ -3,12 +3,12 @@ importScripts('./js/idb.js');
 importScripts('./js/dbhelper.js');
 
 /**
-* Install service worker and feed the cache
+* Service worker
 */
-const CACHE_NAME = 'project-stage2-cache-v1';
-const ImgsCache = 'project-stage2-cache-imgs';
-const allCaches = [CACHE_NAME, ImgsCache];
-let urlsToCache = [
+var CACHE_NAME = 'project-stage2-cache-v1';
+var ImgsCache = 'project-stage2-cache-imgs';
+var allCaches = [CACHE_NAME, ImgsCache];
+var urlsToCache = [
 	'/',
 	'/index.html',
 	'/restaurant.html',
@@ -19,48 +19,41 @@ let urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
-	event.waitUntil(
-		caches.open(CACHE_NAME)
-		.then(function(cache) {
-		console.log('Opened cache');
-		return cache.addAll(urlsToCache);
-		})
-	);
+  // Perform install steps
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
 });
 
-/**
-* Create  database, objectstore and fill-in info fetched from server
-*/
-function createDB() {
-	fetch(DBHelper.DATABASE_URL).then((response)=>{if (response.ok){return response.text()}})
-		.then((text)=>{let feeder = JSON.parse(text); return feeder;})
-		.then(feeder => {
-		idb.open('projphase2', 1, upgradeDb => {
+function createDB(){
+	fetch(DBHelper.DATABASE_URL).then((response)=>{if (response.ok){return response.text()}}).then((text)=>{let feeder = JSON.parse(text); return feeder;}).then(feeder => {
+		idb.open('projphase2', 1, function(upgradeDb) {
 			if (!upgradeDb.objectStoreNames.contains('restaurantList')) {
 				const restaurants = upgradeDb.createObjectStore('restaurantList', {keyPath: 'id'});
-				feeder.forEach(restaurant => {
+				feeder.forEach(function(restaurant){
 				restaurants.put(restaurant); 
 				});
 			}
 		})
-		});
+	});
 }
 
-/**
-* Activate service worker. On activation, call database creation
-*/
 self.addEventListener('activate', event => {
 	event.waitUntil(createDB());
 	console.log('DB was created in sw');
-});
+})
  
-self.addEventListener('activate', event => {
+self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
-        cacheNames.filter(cacheName => {
+        cacheNames.filter(function(cacheName) {
           return cacheName.startsWith('project-stage2-') &&
-                !allCaches.includes(cacheName);
+                 !allCaches.includes(cacheName);
         }).map(function(cacheName) {
           return caches.delete(cacheName);
         })
@@ -69,12 +62,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-/**
-* Intercept fetch requests and provide response from cache and database, when available
-otherwise fetch from network
-*/
 self.addEventListener('fetch', function(event) {
-  let requestUrl = new URL(event.request.url);
+  var requestUrl = new URL(event.request.url);
 	
   if (requestUrl.origin === location.origin) {
 	if (requestUrl.pathname === '/') {
@@ -90,7 +79,7 @@ self.addEventListener('fetch', function(event) {
 	  event.respondWith(caches.match('/restaurant.html'));
 	  return;
 	}
-	//return the request to dbhelper script where decision is made
+	
 	if (requestUrl.pathname === '/restaurants') {
 	  return fetch(event.request);
 	}
@@ -103,7 +92,7 @@ self.addEventListener('fetch', function(event) {
 });
 
 function servePhoto(request) {
-  let storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
+  var storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
 	
   return caches.open(ImgsCache).then(function(cache) {
     return cache.match(storageUrl).then(function(response) {

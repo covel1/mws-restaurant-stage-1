@@ -12,10 +12,11 @@ static get DATABASE_URL() {
 }
 
 /**
-* Fetch all restaurants from the server
-* On error, read from database
+* Fetch all restaurants.
+*
 */
 static fetchRestaurants(callback){
+	
 	fetch(DBHelper.DATABASE_URL)
 		.then(response => {if (response.ok === true){return response.text()}
 		   else{throw new Error('Server response was not ok.')}
@@ -25,19 +26,17 @@ static fetchRestaurants(callback){
 		})
 		.catch(error => {
 		console.log(error + ' Try to load from DB');
-			idb.open('projphase2', 1)
-			.then(db => {
-				console.log('Open DB was hit');
-				let tx = db.transaction(['restaurantList'], 'readonly');
-				let store = tx.objectStore('restaurantList');
-				return store.getAll();
+			idb.open('projphase2', 1).then(db => {
+			console.log('Open DB was hit');
+			var tx = db.transaction(['restaurantList'], 'readonly');
+			var store = tx.objectStore('restaurantList');
+			return store.getAll();
 			})
 			.then(restaurants => {
 				callback(null, restaurants);
 			})
 		})	
 }
-
 /**
 * Fetch a restaurant by its ID.
 */
