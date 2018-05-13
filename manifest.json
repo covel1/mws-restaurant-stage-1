@@ -1,0 +1,15 @@
+{
+  "short_name": "RestReviews",
+  "name": "New York restaurant reviews",
+  "display": "standalone",
+  "background_color": "grey",
+  "theme_color": "blue",
+  "icons": [
+    {
+      "src": "launcher-icon.png",
+      "type": "image/png",
+      "sizes": "144x144 192x192 512x512"
+    }
+  ],
+  "start_url": "index.html?launcher=true"
+}
