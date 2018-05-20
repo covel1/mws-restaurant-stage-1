@@ -1,4 +1,3 @@
-
 let restaurants,
   neighborhoods,
   cuisines;

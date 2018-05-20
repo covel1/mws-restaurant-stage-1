@@ -5,10 +5,10 @@ importScripts('./js/dbhelper.js');
 /**
 * Service worker
 */
-var CACHE_NAME = 'project-stage2-cache-v1';
-var ImgsCache = 'project-stage2-cache-imgs';
-var allCaches = [CACHE_NAME, ImgsCache];
-var urlsToCache = [
+const CACHE_NAME = 'project-stage2-cache-v1';
+const ImgsCache = 'project-stage2-cache-imgs';
+const allCaches = [CACHE_NAME, ImgsCache];
+const urlsToCache = [
 	'/',
 	'/index.html',
 	'/restaurant.html',
@@ -22,7 +22,7 @@ self.addEventListener('install', function(event) {
   // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function(cache) {
+      .then(cache => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
@@ -31,10 +31,10 @@ self.addEventListener('install', function(event) {
 
 function createDB(){
 	fetch(DBHelper.DATABASE_URL).then((response)=>{if (response.ok){return response.text()}}).then((text)=>{let feeder = JSON.parse(text); return feeder;}).then(feeder => {
-		idb.open('projphase2', 1, function(upgradeDb) {
+		idb.open('projphase2', 1, upgradeDb => {
 			if (!upgradeDb.objectStoreNames.contains('restaurantList')) {
 				const restaurants = upgradeDb.createObjectStore('restaurantList', {keyPath: 'id'});
-				feeder.forEach(function(restaurant){
+				feeder.forEach(restaurant =>{
 				restaurants.put(restaurant); 
 				});
 			}
@@ -45,16 +45,16 @@ function createDB(){
 self.addEventListener('activate', event => {
 	event.waitUntil(createDB());
 	console.log('DB was created in sw');
-})
+});
  
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.filter(function(cacheName) {
+        cacheNames.filter(cacheName => {
           return cacheName.startsWith('project-stage2-') &&
                  !allCaches.includes(cacheName);
-        }).map(function(cacheName) {
+        }).map(cacheName => {
           return caches.delete(cacheName);
         })
       );
@@ -62,7 +62,7 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', event => {
   var requestUrl = new URL(event.request.url);
 	
   if (requestUrl.origin === location.origin) {
@@ -85,7 +85,7 @@ self.addEventListener('fetch', function(event) {
 	}
 
   event.respondWith(
-	caches.match(event.request).then(function(response) {
+	caches.match(event.request).then(response => {
 	  return response || fetch(event.request);
 	})
 	);
@@ -94,12 +94,12 @@ self.addEventListener('fetch', function(event) {
 function servePhoto(request) {
   var storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
 	
-  return caches.open(ImgsCache).then(function(cache) {
-    return cache.match(storageUrl).then(function(response) {
+  return caches.open(ImgsCache).then(cache => {
+    return cache.match(storageUrl).then(response => {
       if (response) {
 		  return response;
 	  }
-      return fetch(request).then(function(networkResponse) {
+      return fetch(request).then(networkResponse => {
         cache.put(storageUrl, networkResponse.clone());
         return networkResponse;
       });

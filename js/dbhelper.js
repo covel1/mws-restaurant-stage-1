@@ -13,7 +13,7 @@ static get DATABASE_URL() {
 
 /**
 * Fetch all restaurants.
-*
+* If no response from network then try to get all restaurants records from indexedDB
 */
 static fetchRestaurants(callback){
 	
@@ -37,6 +37,7 @@ static fetchRestaurants(callback){
 			})
 		})	
 }
+
 /**
 * Fetch a restaurant by its ID.
 */
