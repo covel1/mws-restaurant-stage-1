@@ -12,6 +12,41 @@ static get DATABASE_URL() {
 }
 
 /**
+* Reviews end point on server
+*/
+static get DATABASE_REVIEWS_URL() {
+	const port = 1337 // Change to your server port
+	return `http://localhost:${port}/reviews`;
+}
+
+/**
+* Fetch all reviews
+* If no response from network then try to get all reviews records from indexedDB
+*/
+static fetchReviews(callback) {
+	
+	fetch(DBHelper.DATABASE_REVIEWS_URL)
+		.then(response => {if (response.ok === true){return response.text()}
+		   else{throw new Error('Server response was not ok.')}
+		})
+		.then(text => {let reviews = JSON.parse(text);
+			callback(null, reviews);
+		})
+		.catch(error => {
+			console.log(error + ' Try to load from DB');
+			idb.open('projphase3', 1).then(db => {
+			console.log('Open DB was hit');
+			var tx = db.transaction(['reviewList'], 'readonly');
+			var store = tx.objectStore('reviewList');
+			return store.getAll();
+			})
+			.then(reviews => {
+			callback(null, reviews);
+			})
+		})
+}
+
+/**
 * Fetch all restaurants.
 * If no response from network then try to get all restaurants records from indexedDB
 */
@@ -26,7 +61,7 @@ static fetchRestaurants(callback){
 		})
 		.catch(error => {
 		console.log(error + ' Try to load from DB');
-			idb.open('projphase2', 1).then(db => {
+			idb.open('projphase3', 1).then(db => {
 			console.log('Open DB was hit');
 			var tx = db.transaction(['restaurantList'], 'readonly');
 			var store = tx.objectStore('restaurantList');
@@ -36,6 +71,26 @@ static fetchRestaurants(callback){
 				callback(null, restaurants);
 			})
 		})	
+}
+
+/**
+* Fetch reviews by restaurant_id
+*/
+static fetchReviewsByRestaurant (id, callback) {
+	
+	DBHelper.fetchReviews((error, reviews) => {
+		let reviewsForArestaurant = [];
+		if (error) {
+			callback(error, null);
+		} else {
+			reviewsForArestaurant = reviews.filter((obj) => {if(obj.restaurant_id == id){return obj}});				
+		}
+		if (reviewsForArestaurant) { // Got the restaurant's reviews
+          callback(null, reviewsForArestaurant);
+        } else { // Restaurant has no review
+          callback('Restaurant has no review', null);
+        }
+	});
 }
 
 /**

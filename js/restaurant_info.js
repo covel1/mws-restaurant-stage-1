@@ -2,6 +2,22 @@ let restaurant;
 var map;
 
 /**
+ * Get a parameter by name from page URL.
+ */
+getParameterByName = (name, url) => {
+  if (!url)
+    url = window.location.href;
+  name = name.replace(/[\[\]]/g, '\\$&');
+  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
+    results = regex.exec(url);
+  if (!results)
+    return null;
+  if (!results[2])
+    return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+};
+
+/**
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
@@ -42,8 +58,37 @@ fetchRestaurantFromURL = (callback) => {
       fillRestaurantHTML();
       callback(null, restaurant)
     });
+	
+	/*added for test - reviews retrieval from db when offline - 10.06.2018*/ 
+	
+	var db = idb.open('projphase3', 1).then(db => {
+			console.log('Open DB was hit');
+			var tx = db.transaction(['reviewList'], 'readonly');
+			var store = tx.objectStore('reviewList');
+			console.log(store.getAll());
+			})
+	
   }
 };
+
+/**
+ * Get restaurant's reviews
+ */
+fetchReviewsFromURL = (callback) => {
+	const id = getParameterByName('id');
+	DBHelper.fetchReviewsByRestaurant (id, (error, review) => {
+		self.review = review;
+		if (!review) {
+        console.error(error);
+        return;
+      }
+	  callback(null, review);
+	});
+}
+fetchReviewsFromURL((error, reviewsForArestaurant) => {
+	console.log(reviewsForArestaurant);
+	fillReviewsHTML(reviewsForArestaurant);
+})
 
 /**
  * Create restaurant HTML and add it to the webpage
@@ -67,8 +112,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
 };
 
 /**
@@ -94,7 +137,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
@@ -123,7 +166,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.updatedAt);
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -147,18 +190,4 @@ fillBreadcrumb = (restaurant=self.restaurant) => {
   breadcrumb.appendChild(li);
 };
 
-/**
- * Get a parameter by name from page URL.
- */
-getParameterByName = (name, url) => {
-  if (!url)
-    url = window.location.href;
-  name = name.replace(/[\[\]]/g, '\\$&');
-  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
-    results = regex.exec(url);
-  if (!results)
-    return null;
-  if (!results[2])
-    return '';
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
-};
+
