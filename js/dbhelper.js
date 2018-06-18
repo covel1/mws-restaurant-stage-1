@@ -40,7 +40,8 @@ static fetchReviews(id, callback) {
 			var store = tx.objectStore('reviewList');
 			return store.getAll();
 			})
-			.then(reviews => {
+			.then(allReviews => {
+			let reviews = allReviews.filter((obj) => {if(obj.restaurant_id == id){return obj}});	
 			callback(null, reviews);
 			})
 		})
