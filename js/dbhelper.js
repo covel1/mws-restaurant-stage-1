@@ -12,20 +12,20 @@ static get DATABASE_URL() {
 }
 
 /**
-* Reviews end point on server
+* Reviews for a restaurant end point on server
 */
 static get DATABASE_REVIEWS_URL() {
 	const port = 1337 // Change to your server port
-	return `http://localhost:${port}/reviews`;
+	return 'http://localhost:'+`${port}`+'/reviews?restaurant_id=';
 }
 
 /**
-* Fetch all reviews
+* Fetch all reviews for a restaurant
 * If no response from network then try to get all reviews records from indexedDB
 */
-static fetchReviews(callback) {
+static fetchReviews(id, callback) {
 	
-	fetch(DBHelper.DATABASE_REVIEWS_URL)
+	fetch(DBHelper.DATABASE_REVIEWS_URL+`${id}`)
 		.then(response => {if (response.ok === true){return response.text()}
 		   else{throw new Error('Server response was not ok.')}
 		})
@@ -71,26 +71,6 @@ static fetchRestaurants(callback){
 				callback(null, restaurants);
 			})
 		})	
-}
-
-/**
-* Fetch reviews by restaurant_id
-*/
-static fetchReviewsByRestaurant (id, callback) {
-	
-	DBHelper.fetchReviews((error, reviews) => {
-		let reviewsForArestaurant = [];
-		if (error) {
-			callback(error, null);
-		} else {
-			reviewsForArestaurant = reviews.filter((obj) => {if(obj.restaurant_id == id){return obj}});				
-		}
-		if (reviewsForArestaurant) { // Got the restaurant's reviews
-          callback(null, reviewsForArestaurant);
-        } else { // Restaurant has no review
-          callback('Restaurant has no review', null);
-        }
-	});
 }
 
 /**

@@ -76,7 +76,7 @@ fetchRestaurantFromURL = (callback) => {
  */
 fetchReviewsFromURL = (callback) => {
 	const id = getParameterByName('id');
-	DBHelper.fetchReviewsByRestaurant (id, (error, review) => {
+	DBHelper.fetchReviews (id, (error, review) => {
 		self.review = review;
 		if (!review) {
         console.error(error);
