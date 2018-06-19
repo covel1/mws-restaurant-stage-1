@@ -4,16 +4,18 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<meta name="theme-color" content="blue"/>
+	<script src="js/idb.js"></script>
 	<script>
 	function _(id) {
 		return document.getElementById(id);
 	}
-	function submitForm () {
+	function submitForm (callback) {
 		_("mybtn").disabled = true;
 		_("status").innerHTML = 'please wait...';
 		let info = {"restaurant_id": _("rrid").value,"name": _("n").value,"rating": _("rrat").value,"comments": _("m").value}; 
 		fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(info), headers:{'content-type': 'application/json'}})
 		.then(response => { if(response.ok === true){
+			//console.log(info.restaurant_id);
 			_("my_form").reset();
             _("mybtn").disabled = false;
             _("status").innerHTML = '';
@@ -23,8 +25,26 @@
 				_("messg").innerHTML ='Your message cannot be recorded';
 				_("messg").style.visibility = 'visible';
 			}
+			return response.json();
 		})
+		.then(json => callback(info,json.id))
 		.catch(error => console.log(error));
+	}
+	function refreshDB(inf,jid) {
+		console.log('Restaurant id is: '+inf.restaurant_id);
+		console.log('Review id is: '+jid);
+		let db = idb.open('projphase3', 1);
+		db.then((db) => {
+		var tx = db.transaction(['reviewList'], 'readwrite');
+			return tx;
+		})
+		.then((tx) => {
+			var store = tx.objectStore('reviewList');
+			return store;
+		})
+		.then((store) => {
+			store.add({...inf,...{"id":jid}}); 
+			});
 	}
   </script>
 	<link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
@@ -48,7 +68,7 @@
     </nav>
   </header>
   <div style="display:flex;justify-content:center;align-items:center;flex-direction:column;height:calc(100% - 145px);background-color:#f3f3f3">
-	<form class="cell-lg-4 cell-md-12 cell-sm-12" id="my_form" onsubmit="submitForm();return false;">
+	<form class="cell-lg-4 cell-md-12 cell-sm-12" id="my_form" onsubmit="submitForm(refreshDB);return false;">
 	 <p style="text-align:center"><input placeholder="Your name *" type="text" name="name" id="n" style="width:90%; padding:10px;" required></input></p>
 	 <p style="text-align:center"><input placeholder="Restaurant id *" type="text" name="restaurant_id" id="rrid" style="width:45%; padding:10px;margin-bottom:5px" required><input placeholder="Rating" type="text" name="rating" id="rrat" style="width:45%; padding:10px;"></p>
 	 <p style="text-align:center"><textarea placeholder="Add a comment *" rows="10" name="comments" id="m" style="width:90%; padding:10px;" required></textarea></p>
