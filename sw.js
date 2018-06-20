@@ -32,6 +32,35 @@ self.addEventListener('install', function(event) {
   );
 });
 
+function syncReview () {
+	var db = idb.open('projphase3', 1).then(db => {
+			console.log('Open DB was hit');
+			var tx = db.transaction(['tempReviewList'], 'readonly');
+			var store = tx.objectStore('tempReviewList');
+			var ar = store.getAll();
+			return ar;
+			})
+			.then(ar => {var info = ar[0];
+				console.log(info);
+				if(ar.length > 0){
+					fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(info), headers:{'content-type': 'application/json'}})
+					.then(response => {if(response.ok === true){
+						deleteRecord();
+					}})
+				}})
+			.catch(error => console.log(error));
+	return;
+}
+function deleteRecord(){
+	console.log('Will delete record');
+}
+
+self.addEventListener('sync', function(event) {
+  if (event.tag == 'myFirstSync') {
+    event.waitUntil(syncReview());
+  }
+});
+
 async function createDB(){
 	
 	var db = idb.open('projphase3', 1, upgradeDb => {

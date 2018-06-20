@@ -125,6 +125,12 @@
 			  navigator.serviceWorker.oncontrollerchange = function() {
 				console.log('This page is now controlled by:', navigator.serviceWorker.controller);
 			  };
+			
+              // Register sync manager			
+			navigator.serviceWorker.ready.then(function(swRegistration) {
+				return swRegistration.sync.register('myFirstSync');
+			}); 
+			  
 			} else {
 			  console.log('Service workers are not supported.');
 			}
