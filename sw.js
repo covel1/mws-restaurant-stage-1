@@ -35,9 +35,10 @@ self.addEventListener('install', function(event) {
 async function createDB(){
 	
 	var db = idb.open('projphase3', 1, upgradeDb => {
-		if(!upgradeDb.objectStoreNames.contains('restaurantList')||!upgradeDb.objectStoreNames.contains('reviewList')) {
+		if(!upgradeDb.objectStoreNames.contains('restaurantList')||!upgradeDb.objectStoreNames.contains('reviewList')||!upgradeDb.objectStoreNames.contains('tempReviewList')) {
 			upgradeDb.createObjectStore('restaurantList', {keyPath: 'id'});
-			upgradeDb.createObjectStore('reviewList', {keyPath: 'id'});	
+			upgradeDb.createObjectStore('reviewList', {keyPath: 'id'});
+			upgradeDb.createObjectStore('tempReviewList', { autoIncrement : true });
 		}
 	});
 

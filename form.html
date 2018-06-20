@@ -15,20 +15,42 @@
 		let info = {"restaurant_id": _("rrid").value,"name": _("n").value,"rating": _("rrat").value,"comments": _("m").value}; 
 		fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(info), headers:{'content-type': 'application/json'}})
 		.then(response => { if(response.ok === true){
-			//console.log(info.restaurant_id);
 			_("my_form").reset();
             _("mybtn").disabled = false;
             _("status").innerHTML = '';
-            _("messg").innerHTML ='Your comment was recorded. Thank you';
+            _("messg").innerHTML ='Your review was published. Thank you';
 			_("messg").style.visibility = 'visible';
 			} else {
-				_("messg").innerHTML ='Your message cannot be recorded';
+				_("messg").innerHTML ='Your review cannot be published';
 				_("messg").style.visibility = 'visible';
 			}
 			return response.json();
 		})
 		.then(json => callback(info,json.id))
-		.catch(error => console.log(error));
+		.catch(error => {
+			console.log(error);
+			offlineDB();
+		});
+	}
+	function offlineDB() {
+		let info = {"restaurant_id": _("rrid").value,"name": _("n").value,"rating": _("rrat").value,"comments": _("m").value};
+		let db = idb.open('projphase3', 1);
+		db.then((db) => {
+		var tx = db.transaction(['tempReviewList'], 'readwrite');
+			return tx;
+		})
+		.then((tx) => {
+			var store = tx.objectStore('tempReviewList');
+			return store;
+		})
+		.then((store) => {
+			store.add(info); 
+		});
+		_("my_form").reset();
+        _("mybtn").disabled = false;
+		_("status").innerHTML = '';
+		_("messg").innerHTML = 'Your review will be published when you\'ll be online';
+		_("messg").style.visibility = 'visible';
 	}
 	function refreshDB(inf,jid) {
 		console.log('Restaurant id is: '+inf.restaurant_id);
