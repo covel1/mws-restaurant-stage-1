@@ -33,30 +33,38 @@ self.addEventListener('install', function(event) {
 });
 
 function syncReview () {
-	var db = idb.open('projphase3', 1).then(db => {
-			console.log('Open DB was hit');
-			var tx = db.transaction(['tempReviewList'], 'readonly');
-			var store = tx.objectStore('tempReviewList');
-			var ar = store.getAll();
-			return ar;
-			})
-			.then(ar => {var info = ar[0];
-				console.log(info);
-				if(ar.length > 0){
-					fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(info), headers:{'content-type': 'application/json'}})
+	var db = idb.open('projphase3', 1);
+	
+		db.then(db => {
+		console.log('Open DB was hit');
+		var tx = db.transaction(['tempReviewList'], 'readonly');
+		var store = tx.objectStore('tempReviewList');
+		var ar = store.getAll();
+		return ar;
+		})
+		.then((ar) => {
+			if(ar.length > 0){
+				ar.forEach ( (a) => {
+					console.log(a);
+					fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(a), headers:{'content-type': 'application/json'}})
 					.then(response => {if(response.ok === true){
-						deleteRecord();
-					}})
-				}})
-			.catch(error => console.log(error));
-	return;
-}
-function deleteRecord(){
-	console.log('Will delete record');
+						console.log(response.text());
+					}});
+				});
+		}})
+		.catch(error => console.log(error));
+		
+		db.then(db => {
+			var tx = db.transaction(['tempReviewList'], 'readwrite');
+			var store = tx.objectStore('tempReviewList');
+			store.clear();
+		});
+		
 }
 
 self.addEventListener('sync', function(event) {
-  if (event.tag == 'myFirstSync') {
+  if (event.tag == 'bkgSync') {
+	console.log('SYNC event fired!');  
     event.waitUntil(syncReview());
   }
 });

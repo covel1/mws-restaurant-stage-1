@@ -14,7 +14,7 @@
   <header>
     <nav>
       <h1><a href="/">Restaurant Reviews</a></h1>
-	  <button type="button" onclick="location.href='form.html'">Add review</button>
+	  <button type="button" onclick="location.href='form.html'" style="height:30px;width:150px;background-color:blue;color:white;font-size:1.2rem">Add review</button>
     </nav>
   </header>
   <main id="maincontent">
@@ -41,14 +41,14 @@
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
   <script>
-	var CVAPP1 = (function (){
+	var CVAPP1 = (() => {
 		const loadSw = () => {
 			if ('serviceWorker' in navigator) {
 			  // Register a service worker hosted at the root of the
 			  // site using the default scope.
-			  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+			  navigator.serviceWorker.register('/sw.js').then((registration) => {
 				console.log('Service worker registration succeeded:', registration);
-			  }).catch(function(error) {
+			  }).catch((error) => {
 				console.log('Service worker registration failed:', error);
 			  });
 
@@ -60,9 +60,15 @@
 
 			  // Register a handler to detect when a new or
 			  // updated service worker takes control.
-			  navigator.serviceWorker.oncontrollerchange = function() {
+			  navigator.serviceWorker.oncontrollerchange = () => {
 				console.log('This page is now controlled by:', navigator.serviceWorker.controller);
 			  };
+			
+              // Register sync manager			
+			navigator.serviceWorker.ready.then((syncM) => {
+				return syncM.sync.register('bkgSync');
+			}); 
+			
 			} else {
 			  console.log('Service workers are not supported.');
 			}
