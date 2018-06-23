@@ -2,6 +2,14 @@
  * Common database helper functions.
  */
 class DBHelper {
+	
+/**
+* Server URL
+*/	
+static get SERVER_URL() {
+	const port = 1337 // Change to your server port
+	return `http://localhost:${port}`;
+}
 
 /**
 * Database URL.
@@ -20,8 +28,8 @@ static get DATABASE_REVIEWS_URL() {
 }
 
 /**
-* Fetch all reviews for a restaurant
-* If no response from network then try to get all reviews records from indexedDB
+* Fetch all reviews for a restaurant and update indexedDB
+* If no response from network then get all reviews from indexedDB
 */
 static fetchReviews(id, callback) {
 	
@@ -31,9 +39,21 @@ static fetchReviews(id, callback) {
 		})
 		.then(text => {let reviews = JSON.parse(text);
 			callback(null, reviews);
+			return reviews;
 		})
+		.then(reviews => {
+			idb.open('projphase3', 1)
+			.then(db => {
+			console.log('Open DB for update restaurant\'s reviews');
+			var tx = db.transaction(['reviewList'], 'readwrite');
+			var store = tx.objectStore('reviewList');
+				reviews.forEach(review => {
+					store.put(review);	
+				});
+			});
+		})	
 		.catch(error => {
-			console.log(error + ' Try to load from DB');
+			console.log(error + ' Eventually load reviews from indexedDB');
 			idb.open('projphase3', 1).then(db => {
 			console.log('Open DB was hit');
 			var tx = db.transaction(['reviewList'], 'readonly');
@@ -49,7 +69,7 @@ static fetchReviews(id, callback) {
 
 /**
 * Fetch all restaurants.
-* If no response from network then try to get all restaurants records from indexedDB
+* If no response from network then get all restaurants records from indexedDB
 */
 static fetchRestaurants(callback){
 	
@@ -61,7 +81,7 @@ static fetchRestaurants(callback){
 			callback(null, restaurants);
 		})
 		.catch(error => {
-		console.log(error + ' Try to load from DB');
+		console.log(error + ' Eventually load restaurants from indexedDB');
 			idb.open('projphase3', 1).then(db => {
 			console.log('Open DB was hit');
 			var tx = db.transaction(['restaurantList'], 'readonly');

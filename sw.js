@@ -33,10 +33,11 @@ self.addEventListener('install', function(event) {
 });
 
 function syncReview () {
+	//Background sync handler
 	var db = idb.open('projphase3', 1);
 	
 		db.then(db => {
-		console.log('Open DB was hit');
+		console.log('Open DB was hit while offline');
 		var tx = db.transaction(['tempReviewList'], 'readonly');
 		var store = tx.objectStore('tempReviewList');
 		var ar = store.getAll();
@@ -46,20 +47,19 @@ function syncReview () {
 			if(ar.length > 0){
 				ar.forEach ( (a) => {
 					console.log(a);
-					fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(a), headers:{'content-type': 'application/json'}})
+					fetch(DBHelper.SERVER_URL+`/reviews`,{method: 'POST', body: JSON.stringify(a), headers:{'content-type': 'application/json'}})
 					.then(response => {if(response.ok === true){
 						console.log(response.text());
 					}});
 				});
 		}})
 		.catch(error => console.log(error));
-		
+		//clear records from temporary object store when going online
 		db.then(db => {
 			var tx = db.transaction(['tempReviewList'], 'readwrite');
 			var store = tx.objectStore('tempReviewList');
 			store.clear();
-		});
-		
+		});	
 }
 
 self.addEventListener('sync', function(event) {
@@ -70,7 +70,7 @@ self.addEventListener('sync', function(event) {
 });
 
 async function createDB(){
-	
+	//Create indexedDB projphase3 and object stores
 	var db = idb.open('projphase3', 1, upgradeDb => {
 		if(!upgradeDb.objectStoreNames.contains('restaurantList')||!upgradeDb.objectStoreNames.contains('reviewList')||!upgradeDb.objectStoreNames.contains('tempReviewList')) {
 			upgradeDb.createObjectStore('restaurantList', {keyPath: 'id'});
@@ -84,7 +84,7 @@ async function createDB(){
 		.then((text)=>{let feeder = JSON.parse(text); return feeder;});
 	
 	restaurants.forEach( async function(restaurant) {
-		let reviews = await fetch(`http://localhost:1337/reviews?restaurant_id=${restaurant.id}`)
+		let reviews = await fetch(DBHelper.DATABASE_REVIEWS_URL+`${restaurant.id}`)
 			.then((response)=>{if (response.ok){return response.text()}})
 			.then((text)=>{let feeder = JSON.parse(text); return feeder;});
 		

@@ -57,17 +57,7 @@ fetchRestaurantFromURL = (callback) => {
       }
       fillRestaurantHTML();
       callback(null, restaurant)
-    });
-	
-	/*added for test - reviews retrieval from db when offline - 10.06.2018*/ 
-	
-	var db = idb.open('projphase3', 1).then(db => {
-			console.log('Open DB was hit');
-			var tx = db.transaction(['reviewList'], 'readonly');
-			var store = tx.objectStore('reviewList');
-			console.log(store.getAll());
-			})
-	
+    });	
   }
 };
 
