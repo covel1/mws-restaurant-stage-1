@@ -19,10 +19,10 @@
 			_("my_form").reset();
             _("mybtn").disabled = false;
             _("status").innerHTML = '';
-            _("messg").innerHTML ='Your review was published. Thank you';
+            _("messg").innerHTML ='<h3>Your review was published. Thank you</h3>';
 			_("messg").style.visibility = 'visible';
 			} else {
-				_("messg").innerHTML ='Your review cannot be published';
+				_("messg").innerHTML ='<h3>Your review cannot be published</h3>';
 				_("messg").style.visibility = 'visible';
 			}
 			return response.json();
@@ -50,7 +50,7 @@
 		_("my_form").reset();
         _("mybtn").disabled = false;
 		_("status").innerHTML = '';
-		_("messg").innerHTML = 'Your review will be published when you\'ll be online';
+		_("messg").innerHTML = '<h3>Your review will be published when you\'ll be online</h3>';
 		_("messg").style.visibility = 'visible';
 	}
 	function refreshDB(inf,jid) {
@@ -100,25 +100,34 @@
 	<label>Restaurant</label>
 	<select name="restaurant_id" id="rrid" style="min-width:180px; width:45%; padding:10px;margin-bottom:5px" required >
 	<script>
-		let restList = fetch(DBHelper.DATABASE_URL)
+		fetch(DBHelper.DATABASE_URL)
 		.then(response => {if (response.ok === true){return response.text()}
 		   else{throw new Error('Server response was not ok.')}
 		})
 		.then(text => {let restaurants = JSON.parse(text);
-			return restaurants;
+			fillDrdl(restaurants);
+		})
+		.catch(error => {
+			console.log(error + ' Eventually load restaurants from indexedDB');
+			idb.open('projphase3', 1).then(db => {
+			console.log('Open DB was hit to get restaurants offline for drop-down list');
+			var tx = db.transaction(['restaurantList'], 'readonly');
+			var store = tx.objectStore('restaurantList');
+			return store.getAll();
+			})
+			.then(restaurants => {
+				fillDrdl(restaurants);
+			})
 		});
-		const cr = document.getElementById('rrid');
-		//console.log(cr);
-		//const opt = document.createElement('option');
-		//cr.appendChild(opt);
-		restList.then(restaurants => {restaurants.forEach(rest => {
-			const opt = document.createElement('option');
-			//console.log(rest.name+rest.id);
-			opt.innerHTML = rest.name;
-			opt.setAttribute('value',rest.id);
-			cr.appendChild(opt);
-			});
-		});
+		function fillDrdl(restList) {
+			const cr = document.getElementById('rrid');
+			restList.forEach(rest => {
+				const opt = document.createElement('option');
+				opt.innerHTML = rest.name;
+				opt.setAttribute('value',rest.id);
+				cr.appendChild(opt);
+				});
+		}
 	</script>
 	</select>
 	</p>
@@ -132,10 +141,6 @@
 		<option value="1">1</option>
 	</select>
 	</p> 
-	<!--<input placeholder="Restaurant id *" type="text" name="restaurant_id" id="rrid" style="width:45%; padding:10px;margin-bottom:5px" required>
-	<input placeholder="Rating" type="text" name="rating" id="rrat" style="width:45%; padding:10px;" required>-->
-	
-
 	<p style="text-align:center">
 	<textarea placeholder="Add a comment *" rows="10" name="comments" id="m" style="width:90%; padding:10px;" required></textarea>
 	</p>
@@ -144,7 +149,7 @@
 	 </p>
 	 <span id="status"></span>
 </form> 
-	<div class="cell-lg-4 cell-md-12 cell-sm-12" id="messg" style="background-color:white; padding: 10px;"></div>
+	<div class="cell-lg-4 cell-md-12 cell-sm-12" id="messg" style="background-color:white; padding: 10px; text-align: center"></div>
   </div>
   <footer id="footer">
     Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
