@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<meta name="theme-color" content="blue"/>
 	<script src="js/idb.js"></script>
+	<script src="js/dbhelper.js"></script>
 	<script>
 	function _(id) {
 		return document.getElementById(id);
@@ -12,7 +13,7 @@
 	function submitForm (callback) {
 		_("mybtn").disabled = true;
 		_("status").innerHTML = 'please wait...';
-		let info = {"restaurant_id": _("rrid").value,"name": _("n").value,"rating": _("rrat").value,"comments": _("m").value}; 
+		let info = {"restaurant_id": _("rrid").value,"name": _("n").value,"rating": _("rrat").value,"comments": _("m").value};
 		fetch('http://localhost:1337/reviews',{method: 'POST', body: JSON.stringify(info), headers:{'content-type': 'application/json'}})
 		.then(response => { if(response.ok === true){
 			_("my_form").reset();
@@ -91,12 +92,58 @@
   </header>
   <div style="display:flex;justify-content:center;align-items:center;flex-direction:column;height:calc(100% - 145px);background-color:#f3f3f3">
 	<form class="cell-lg-4 cell-md-12 cell-sm-12" id="my_form" onsubmit="submitForm(refreshDB);return false;">
-	 <p style="text-align:center"><input placeholder="Your name *" type="text" name="name" id="n" style="width:90%; padding:10px;" required></input></p>
-	 <p style="text-align:center"><input placeholder="Restaurant id *" type="text" name="restaurant_id" id="rrid" style="width:45%; padding:10px;margin-bottom:5px" required><input placeholder="Rating" type="text" name="rating" id="rrat" style="width:45%; padding:10px;"></p>
-	 <p style="text-align:center"><textarea placeholder="Add a comment *" rows="10" name="comments" id="m" style="width:90%; padding:10px;" required></textarea></p>
-	 <p style="text-align:center"><button type="submit" id="mybtn"  style="background-color:blue;height:40px;width:100px;color:white">Submit</button></p>
+	<p style="text-align:center">
+	<input placeholder="Your name *" type="text" name="name" id="n" style="width:90%; padding:10px;" required>
+	</p>
+	 
+	<p style="text-align:center">
+	<label>Restaurant</label>
+	<select name="restaurant_id" id="rrid" style="min-width:180px; width:45%; padding:10px;margin-bottom:5px" required >
+	<script>
+		let restList = fetch(DBHelper.DATABASE_URL)
+		.then(response => {if (response.ok === true){return response.text()}
+		   else{throw new Error('Server response was not ok.')}
+		})
+		.then(text => {let restaurants = JSON.parse(text);
+			return restaurants;
+		});
+		const cr = document.getElementById('rrid');
+		//console.log(cr);
+		//const opt = document.createElement('option');
+		//cr.appendChild(opt);
+		restList.then(restaurants => {restaurants.forEach(rest => {
+			const opt = document.createElement('option');
+			//console.log(rest.name+rest.id);
+			opt.innerHTML = rest.name;
+			opt.setAttribute('value',rest.id);
+			cr.appendChild(opt);
+			});
+		});
+	</script>
+	</select>
+	</p>
+	<p style="text-align:center">
+	<label>Rating</label>
+	<select placeholder="Rating" name="rating" id="rrat" style="min-width:30px; width:45%; padding:10px;margin-bottom:5px" required>
+		<option value="5">5</option>
+		<option value="4">4</option>
+		<option value="3">3</option>
+		<option value="2">2</option>
+		<option value="1">1</option>
+	</select>
+	</p> 
+	<!--<input placeholder="Restaurant id *" type="text" name="restaurant_id" id="rrid" style="width:45%; padding:10px;margin-bottom:5px" required>
+	<input placeholder="Rating" type="text" name="rating" id="rrat" style="width:45%; padding:10px;" required>-->
+	
+
+	<p style="text-align:center">
+	<textarea placeholder="Add a comment *" rows="10" name="comments" id="m" style="width:90%; padding:10px;" required></textarea>
+	</p>
+	 <p style="text-align:center">
+	 <button type="submit" id="mybtn"  style="background-color:blue;height:40px;width:100px;color:white">Submit</button>
+	 </p>
 	 <span id="status"></span>
-	</form>
+</form> 
 	<div class="cell-lg-4 cell-md-12 cell-sm-12" id="messg" style="background-color:white; padding: 10px;"></div>
   </div>
   <footer id="footer">
